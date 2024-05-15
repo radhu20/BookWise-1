@@ -2,54 +2,45 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE_NAME_BACKEND = 'backend'
-        DOCKER_IMAGE_NAME_FRONTEND = 'frontend'
-        DOCKER_IMAGE_NAME_MODEL = 'model'
+        DOCKER_IMAGE_NAME_BACKEND = 'bookwise-backend'
+        DOCKER_IMAGE_NAME_FRONTEND = 'bookwise-frontend'
         GITHUB_REPO_URL = 'https://github.com/Somya05M/BookWise.git'
+        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+        NOTEBOOK_FILENAME = 'book-recommender-system.ipynb'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                script {
-                    // Checkout the code from the GitHub repository
-                    git branch: 'main', url: "${GITHUB_REPO_URL}"
-                }
+                git branch: 'main', url: "${GITHUB_REPO_URL}"
             }
         }
 
         stage('Run Model') {
             steps {
                 script {
-                    // Assuming you have a mechanism to run Jupyter notebooks
-                    sh 'jupyter nbconvert --to notebook --execute book-recommender-system.ipynb'
+                    // Install Jupyter Notebook if not already installed
+                    sh "pip install jupyter"
+                    // Run the Jupyter notebook
+                    sh "jupyter nbconvert --to notebook --execute ${NOTEBOOK_FILENAME}"
                 }
             }
         }
 
-        stage('Build Backend Docker Image') {
+        stage('Run Docker Compose') {
             steps {
                 script {
-                    // Build Backend Docker image
-                    docker.build("${DOCKER_IMAGE_NAME_BACKEND}", '-f Dockerfile.backend .')
+                    // Run docker-compose
+                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up -d"
                 }
             }
         }
 
-        stage('Build Frontend Docker Image') {
+        stage('Unit Test') {
             steps {
                 script {
-                    // Build Frontend Docker image
-                    docker.build("${DOCKER_IMAGE_NAME_FRONTEND}", '-f Dockerfile.frontend .')
-                }
-            }
-        }
-
-        stage('Build Model Docker Image') {
-            steps {
-                script {
-                    // Build Model Docker image
-                    docker.build("${DOCKER_IMAGE_NAME_MODEL}", '-f Dockerfile.model .')
+                    // Run unit tests using the test.py file
+                    sh "python test.py"
                 }
             }
         }
@@ -63,9 +54,6 @@ pipeline {
 
                         // Push Frontend Docker image to Docker Hub
                         docker.image("${DOCKER_IMAGE_NAME_FRONTEND}").push()
-
-                        // Push Model Docker image to Docker Hub
-                        docker.image("${DOCKER_IMAGE_NAME_MODEL}").push()
                     }
                 }
             }
