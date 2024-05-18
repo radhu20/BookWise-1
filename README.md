@@ -36,13 +36,3 @@ Established two robust CI/CD pipelines to automate the deployment process:
 2. **Pipeline 2**:
    - **Tools Used**: Jenkins, Docker, Kubernetes
    - **Description**: This pipeline focuses on container orchestration using Kubernetes. It ensures the application is scalable and resilient by managing containerized applications across a cluster of machines.
-
-## Getting Started
-
-### Prerequisites
-
-- Docker
-- Docker-Compose
-- Kubernetes
-- Jenkins
-- Ansible
