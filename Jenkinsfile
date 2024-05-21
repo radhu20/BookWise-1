@@ -37,7 +37,7 @@ pipeline {
         stage('Push Docker Images Frontend') {
             steps {
                 script {
-                    docker.withRegistry('', 'DockerHubCred') {
+                    docker.withRegistry('', 'docker-hub-credentials') {
                         // Tag and push Frontend Docker image to Docker Hub
                         sh "docker tag bookwise-frontend radhika20/${env.DOCKER_IMAGE_NAME_FRONTEND}:latest"
                         sh "docker push radhika20/${env.DOCKER_IMAGE_NAME_FRONTEND}"
