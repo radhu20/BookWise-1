@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME_BACKEND = 'bookwise-backend'
         DOCKER_IMAGE_NAME_FRONTEND = 'bookwise-frontend'
-        GITHUB_REPO_URL = 'https://github.com/Somya05M/BookWise.git'
+        GITHUB_REPO_URL = 'https://github.com/radhu20/BookWise-1'
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
         NOTEBOOK_FILENAME = 'book-recommender-system.ipynb'
     }
@@ -48,7 +48,7 @@ pipeline {
         stage('Push Docker Images to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('', DockerHubCred) {
+                    docker.withRegistry('', docker-hub-credentials) {
                         // Push Backend Docker image to Docker Hub
                         docker.image("${DOCKER_IMAGE_NAME_BACKEND}").push()
 
