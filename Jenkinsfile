@@ -45,7 +45,7 @@ pipeline {
         stage('Push Docker Images Backend') {
             steps {
                 script {
-                    docker.withRegistry('', 'DockerHubCred') {
+                    docker.withRegistry('', 'docker-hub-credentials') {
                         sh "docker tag bookwise-backend radhika20/${env.DOCKER_IMAGE_NAME_BACKEND}:latest"
                         sh "docker push radhika20/${env.DOCKER_IMAGE_NAME_BACKEND}"
                     }
