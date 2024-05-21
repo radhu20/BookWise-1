@@ -10,15 +10,7 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASS')]) {
-                        sh "git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/radhu20/BookWise-1.git"
-                    }
-                }
-            }
-        }
+
         stage('Delete All Running Containers') {
             steps {
                 script {
@@ -39,22 +31,12 @@ pipeline {
             }
         }
 
-        stage('Build Docker Images') {
-            steps {
-                script {
-                    echo "Building Docker Images"
-                    sh "docker-compose -f ${env.DOCKER_COMPOSE_FILE} build"
-                }
-            }
-        }
-
         stage('Push Docker Images Frontend') {
             steps {
                 script {
-                    echo "Pushing Frontend Docker Image"
-                    withDockerRegistry(credentialsId: 'docker-hub-credentials') {
-                        sh "docker tag ${env.DOCKER_IMAGE_NAME_FRONTEND} radhika20/${env.DOCKER_IMAGE_NAME_FRONTEND}:latest"
-                        sh "docker push radhika20/${env.DOCKER_IMAGE_NAME_FRONTEND}:latest"
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        sh "docker tag bookwise-frontend radhika20/${env.DOCKER_IMAGE_NAME_FRONTEND}:latest"
+                        sh "docker push radhika20/${env.DOCKER_IMAGE_NAME_FRONTEND}"
                     }
                 }
             }
@@ -63,10 +45,9 @@ pipeline {
         stage('Push Docker Images Backend') {
             steps {
                 script {
-                    echo "Pushing Backend Docker Image"
-                    withDockerRegistry(credentialsId: 'docker-hub-credentials') {
-                        sh "docker tag ${env.DOCKER_IMAGE_NAME_BACKEND} radhika20/${env.DOCKER_IMAGE_NAME_BACKEND}:latest"
-                        sh "docker push radhika20/${env.DOCKER_IMAGE_NAME_BACKEND}:latest"
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        sh "docker tag bookwise-backend radhika20/${env.DOCKER_IMAGE_NAME_BACKEND}:latest"
+                        sh "docker push radhika20/${env.DOCKER_IMAGE_NAME_BACKEND}"
                     }
                 }
             }
@@ -76,14 +57,6 @@ pipeline {
             steps {
                 script {
                     sh "python3 test.py"
-                }
-            }
-        }
-
-        stage('Execute Notebook') {
-            steps {
-                script {
-                    sh "jupyter nbconvert --to notebook --execute ${env.NOTEBOOK_FILENAME}"
                 }
             }
         }
@@ -111,25 +84,6 @@ pipeline {
                         ]
                     )
                 }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                echo 'Cleaning up workspace'
-                cleanWs()
-            }
-        }
-        failure {
-            script {
-                echo 'Pipeline failed. Investigate the issue.'
-            }
-        }
-        success {
-            script {
-                echo 'Pipeline succeeded.'
             }
         }
     }
